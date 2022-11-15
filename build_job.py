@@ -2,11 +2,24 @@
 import sys
 import time
 import urllib3
+import os
 
 from src.apps.Jenkins.Infrastructure.ServerJenkinsRepository import ServerJenkinsRepository
 from src.apps.Jenkins.Application.Build.JobBuilder import JobBuilder
 from src.apps.Jenkins.Application.Find.BuildFinder import BuildFinder
 from src.apps.Jenkins.Domain.JobParams import JobParams
+
+
+def set_action_output(output_name, value):
+    """Sets the GitHub Action output.
+
+    Keyword arguments:
+    output_name - The name of the output
+    value - The value of the output
+    """
+    if "GITHUB_OUTPUT" in os.environ:
+        with open(os.environ["GITHUB_OUTPUT"], "a") as f:
+            print("{0}={1}".format(output_name, value), file=f)
 
 
 def mandatory_arg(argv):
@@ -42,7 +55,7 @@ print(f"BUILD NUMBER: {build_number}")
 
 if JENKINS_WAIT_JOB == "no-wait" and build_number:
     print("Job status is : EXECUTED")
-    print("::set-output name=job_status::EXECUTED")
+    set_action_output('job_status', 'EXECUTED')
     exit(0)
 
 # Get build status
@@ -50,8 +63,9 @@ while not (status := finder.exec(build_number)):
     time.sleep(1)
 
 print(f"Job status is : {status}")
-print(f"::set-output name=job_status::{status}")
-print(f"::set-output name=job_build_number::{build_number}")
+
+set_action_output('job_status', status)
+set_action_output('job_build_number', build_number)
 
 if status != 'SUCCESS':
     exit(1)
