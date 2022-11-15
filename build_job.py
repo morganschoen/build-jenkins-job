@@ -67,5 +67,5 @@ print(f"Job status is : {status}")
 set_action_output('job_status', status)
 set_action_output('job_build_number', build_number)
 
-if status != 'SUCCESS':
-    exit(1)
+#if status != 'SUCCESS':
+#    exit(1)
